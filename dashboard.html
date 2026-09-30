@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Tableau de décision – ApelTech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+    <style>
+        :root{--ac:#f0b83a}
+        *{box-sizing:border-box}
+        body{margin:0;background:radial-gradient(circle at 20% 0,#14563a,#020d08 65%) fixed;color:#fff;font-family:Inter,system-ui,sans-serif;min-height:100vh}
+        main{max-width:1100px;margin:0 auto;padding:28px 16px}
+        h1{font:400 2.2rem "Instrument Serif",serif;margin:0 0 4px}
+        .muted{color:rgba(255,255,255,.6);font-size:.9rem;margin:0 0 20px}
+        .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:20px;backdrop-filter:blur(12px);margin-bottom:24px}
+        input,select{font:inherit;color:#fff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;color-scheme:dark}
+        select option{color:#000}
+        button{font:600 .9rem Inter;background:var(--ac);color:#1a1200;border:0;border-radius:999px;padding:10px 22px;cursor:pointer}
+        button.g{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
+        #login{max-width:380px;margin:12vh auto;display:grid;gap:12px}
+        .bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+        .bar input{flex:1;min-width:180px}
+        .tw{overflow-x:auto}
+        table{width:100%;border-collapse:collapse;font-size:.9rem}
+        th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap}
+        td.w{white-space:normal;min-width:220px}
+        th{color:rgba(255,255,255,.55);font-weight:500;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+        tbody tr{cursor:pointer}tbody tr:hover{background:rgba(255,255,255,.06)}
+        tr.top{background:rgba(240,184,58,.1)}
+        .sc{font-weight:600;color:var(--ac)}
+        #det{margin-top:18px}
+        #det h3{margin:0 0 12px;font:400 1.6rem "Instrument Serif",serif}
+        #det dt{color:var(--ac);font-size:.8rem;margin-top:10px}
+        #det dd{margin:2px 0 0;white-space:pre-wrap}
+        .err{color:#ff8a8a;margin:0}
+        .logout-btn{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);margin-left:12px;padding:6px 12px;font-size:.8rem}
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h1>Tableau de décision</h1>
+            <div>
+                <button class="logout-btn" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <p class="muted" id="stats"></p>
+        <div class="card">
+            <div class="bar">
+                <input id="search" placeholder="Rechercher (titre, localité, contributeur…)">
+                <select id="sector"><option value="">Tous les secteurs</option></select>
+                <button class="g" id="exportCSV">Exporter CSV</button>
+            </div>
+            <div class="tw"><table>
+                <thead><tr><th>Rang</th><th>Problème</th><th>Localité</th><th>Secteur</th><th>Score /25</th><th>Contributeur</th><th>Date</th></tr></thead>
+                <tbody id="rows"></tbody>
+            </table></div>
+            <p class="muted" style="margin:14px 0 0">Classement d'après les notes personnelles des contributeurs. Il prépare la grille collective du bureau, il ne la remplace pas.</p>
+        </div>
+        <div class="card" id="detail"></div>
+    </main>
+
+    <script>
+        // ⚙️ Mêmes valeurs que dans login.html
+        const CFG = {
+            URL: 'https://zktplxwnpznqhciiuuxv.supabase.co',
+            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InprdHBseHducHpucWhjaWl1dXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NTI5OTksImV4cCI6MjEwNTEyODk5OX0.WvdALi33fk_105_3Gzsmjn6IunqvjeiSYEz6fuUibKI'
+        };
+        const $ = s => document.querySelector(s);
+        let TOKEN = null, DATA = [];
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            TOKEN = localStorage.getItem('apeltech_token');
+            if (!TOKEN) {
+                window.location.href = 'login.html';
+                return;
+            }
+            loadData();
+        });
+
+        // Handle logout
+        document.getElementById('logoutBtn').onclick = () => {
+            localStorage.removeItem('apeltech_token');
+            window.location.href = 'login.html';
+        };
+
+        async function loadData() {
+            try {
+                const r = await fetch(CFG.URL + '/rest/v1/fiches?select=*&order=score_total.desc,created_at.asc', {
+                    headers: {
+                        apikey: CFG.KEY,
+                        Authorization: 'Bearer ' + TOKEN
+                    }
+                });
+
+                if (!r.ok) {
+                    if (r.status === 401) {
+                        localStorage.removeItem('apeltech_token');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error('Failed to load data');
+                }
+
+                DATA = await r.json();
+                renderStats();
+                populateSectorFilter();
+                renderTable();
+            } catch (err) {
+                console.error(err);
+                alert('Erreur de chargement des données. Veuillez vous reconnecter.');
+                localStorage.removeItem('apeltech_token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function renderStats() {
+            const moy = DATA.length ? (DATA.reduce((a, d) => a + d.score_total, 0) / DATA.length).toFixed(1) : 0;
+            $('#stats').textContent = `${DATA.length} fiche(s) · score moyen ${moy}/25 · ${new Set(DATA.map(d => d.localite)).size} localité(s)`;
+        }
+
+        function populateSectorFilter() {
+            const sectors = [...new Set(DATA.flatMap(d => (d.secteur || '').split(', ').filter(Boolean)))].sort();
+            $('#sector').innerHTML = '<option value="">Tous les secteurs</option>' + sectors.map(s => `<option>${escapeHtml(s)}</option>`).join('');
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&',
+                '<': '<',
+                '>': '>',
+                '"': '"',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, c => map[c]);
+        }
+
+        function renderTable() {
+            const q = $('#search').value.toLowerCase();
+            const sec = $('#sector').value;
+            const med = ['🥇', '🥈', '🥉'];
+
+            $('#rows').innerHTML = DATA.map((d, i) => [d, i])
+                .filter(([d]) => {
+                    const matchesSector = !sec || (d.secteur || '').includes(sec);
+                    const matchesQuery = !q || [d.titre, d.localite, d.nom].join(' ').toLowerCase().includes(q);
+                    return matchesSector && matchesQuery;
+                })
+                .map(([d, i]) => `
+                    <tr class="${i < 3 ? 'top' : ''}" data-i="${i}">
+                        <td>${med[i] || i + 1}</td>
+                        <td class="w">${escapeHtml(d.titre)}</td>
+                        <td>${escapeHtml(d.localite)}</td>
+                        <td>${escapeHtml(d.secteur)}</td>
+                        <td class="sc">${d.score_total}</td>
+                        <td>${escapeHtml(d.nom)}</td>
+                        <td>${(d.created_at || '').slice(0, 10)}</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="7">Aucune fiche.</td></tr>';
+        }
+
+        $('#search').oninput = $('#sector').onchange = renderTable;
+
+        $('#rows').onclick = e => {
+            const tr = e.target.closest('tr');
+            if (!tr || !tr.dataset.i) return;
+            const d = DATA[tr.dataset.i];
+            showDetail(d);
+        };
+
+        function showDetail(d) {
+            const responsesHtml = Object.entries(d.reponses || {}).map(([k, v]) => `
+                <dt>${escapeHtml(k)}</dt>
+                <dd>${escapeHtml(v)}</dd>
+            `).join('');
+
+            $('#detail').innerHTML = `
+                <h3>${escapeHtml(d.titre)}</h3>
+                <p class="muted">${escapeHtml(d.nom)} · ${escapeHtml(d.localite)} · score ${d.score_total}/25
+                    (importance ${d.n0}, touchés ${d.n1}, impact ${d.n2}, faisabilité ${d.n3}, urgence ${d.n4})</p>
+                <dl>${responsesHtml}</dl>
+            `;
+            $('#detail').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        $('#exportCSV').onclick = () => {
+            const keys = [...new Set(DATA.flatMap(d => Object.keys(d.reponses || {})))];
+            const rows = [
+                ['date', 'score_total', 'n0', 'n1', 'n2', 'n3', 'n4', ...keys],
+                ...DATA.map(d => [
+                    (d.created_at || '').slice(0, 10),
+                    d.score_total,
+                    d.n0,
+                    d.n1,
+                    d.n2,
+                    d.n3,
+                    d.n4,
+                    ...keys.map(k => (d.reponses || {})[k] || '')
+                ])
+            ];
+
+            const tsv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob(['﻿' + tsv], { type: 'text/csv' }));
+            a.download = 'fiches-apeltech.csv';
+            a.click();
+        };
+    </script>
+</body>
+</html>

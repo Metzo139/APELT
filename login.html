@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Connexion – ApelTech Bureau</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+    <style>
+        :root{--ac:#f0b83a}
+        *{box-sizing:border-box}
+        body{margin:0;background:radial-gradient(circle at 20% 0,#14563a,#020d08 65%) fixed;color:#fff;font-family:Inter,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+        .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:28px;backdrop-filter:blur(12px);width:100%;max-width:380px}
+        h1{font:400 2.2rem "Instrument Serif",serif;margin:0 0 4px}
+        .muted{color:rgba(255,255,255,.6);font-size:.9rem;margin:0 0 20px}
+        input,select{font:inherit;color:#fff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;color-scheme:dark;width:100%;margin-bottom:12px}
+        select option{color:#000}
+        button{font:600 .9rem Inter;background:var(--ac);color:#1a1200;border:0;border-radius:999px;padding:10px 22px;cursor:pointer;width:100%;margin-top:16px}
+        button.g{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
+        .err{color:#ff8a8a;margin:12px 0 0;min-height:18px}
+        .logo{text-align:center;margin-bottom:20px}
+        .logo img{height:40px}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <!-- Logo would go here -->
+        </div>
+        <h1>Espace du bureau</h1>
+        <p class="muted">Connexion réservée aux membres autorisés.</p>
+        <form id="loginForm">
+            <input id="email" type="email" placeholder="E-mail" required autocomplete="username">
+            <input id="password" type="password" placeholder="Mot de passe" required autocomplete="current-password">
+            <button type="submit">Se connecter</button>
+            <p class="err" id="error"></p>
+        </form>
+    </div>
+
+    <script>
+        // ⚙️ Mêmes valeurs que dans index.html
+        const CFG = {
+            URL: 'https://zktplxwnpznqhciiuuxv.supabase.co',
+            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InprdHBseHducHpucWhjaWl1dXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NTI5OTksImV4cCI6MjEwNTEyODk5OX0.WvdALi33fk_105_3Gzsmjn6IunqvjeiSYEz6fuUibKI'
+        };
+        const $ = s => document.querySelector(s);
+
+        document.getElementById('loginForm').onsubmit = async e => {
+            e.preventDefault();
+            const errorEl = $('#error');
+            errorEl.textContent = '';
+
+            try {
+                const r = await fetch(CFG.URL + '/auth/v1/token?grant_type=password', {
+                    method: 'POST',
+                    headers: {
+                        apikey: CFG.KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: $('#email').value,
+                        password: $('#password').value
+                    })
+                });
+
+                const j = await r.json();
+                if (!j.access_token) throw new Error('Invalid credentials');
+
+                // Store token and redirect to dashboard
+                localStorage.setItem('apeltech_token', j.access_token);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                errorEl.textContent = 'Identifiants incorrects.';
+                $('#password').value = '';
+            }
+        };
+    </script>
+</body>
+</html>
