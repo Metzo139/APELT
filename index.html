@@ -87,6 +87,7 @@ body[data-page=accueil] main{display:none}body[data-page=fiche] .hero{display:no
 body[data-page=fiche] main,body[data-page=accueil] .hero,#res:not([hidden]){animation:in .7s cubic-bezier(.16,1,.3,1)}
 .cf{position:fixed;left:50%;top:45%;width:9px;height:14px;border-radius:2px;z-index:50;pointer-events:none;animation:cf 1.3s cubic-bezier(.2,.7,.3,1) forwards}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+.ge{color:#ff9a9a;font-size:.85rem;margin:6px 0 0}
 @media(max-width:640px){.nav a{display:none}.card{padding:20px}.sc{grid-template-columns:1fr 70px}}
 @media print{#bg,.veil,.nav,.hero,#wiz,.row{display:none!important}body{background:#fff;color:#000}#res pre{background:#fff;max-height:none}}
 </style>
@@ -103,8 +104,8 @@ body[data-page=fiche] main,body[data-page=accueil] .hero,#res:not([hidden]){anim
   <img class="logo hlogo rise" alt="APELTECH Keur Maba Diakhou">
   <p class="tag rise" style="--d:.1s">Communauté ApelTech · Commune de Keur Maba</p>
   <h1 class="rise" style="--d:.25s">Ce que vous voyez chaque jour peut changer <em>Keur Maba</em>.</h1>
-  <p class="sub rise" style="--d:.45s">Décrivez un problème de votre quartier en 5 minutes. Les 3 plus urgents deviendront des solutions concrètes.</p>
-  <div class="chips rise" style="--d:.6s"><span class="glass">5 minutes chrono</span><span class="glass">Votre terrain, votre voix</span><span class="glass">3 projets seront construits</span></div>
+  <p class="sub rise" style="--d:.45s">Décrivez un problème de votre quartier en 3 minutes. Les 3 plus urgents deviendront des solutions concrètes.</p>
+  <div class="chips rise" style="--d:.6s"><span class="glass">2 étapes, 3 minutes</span><span class="glass">Votre terrain, votre voix</span><span class="glass">3 projets seront construits</span></div>
   <p class="rule rise" style="--d:.7s">Problème local → besoin réel → solution adaptée → impact mesurable</p>
   <a href="#" data-go="fiche" class="btn rise" style="--d:.8s">Raconter un problème</a>
 </section>
@@ -157,46 +158,25 @@ const S=[
  ["area","causes","Causes principales identifiées"],
  ["area","consequences","Conséquences actuelles"],
  ["area","preuves","Exemples / preuves / observations de terrain"]]],
-["C · Solution envisagée",[
- ["area","idee","Idée de solution","Quelques phrases. Quel besoin répond-elle ?"],
- ["area","fonctionnement","Comment la solution fonctionnerait-elle ?","Le parcours utilisateur ou les principales étapes."],
- ["area","technologies","Technologies envisageables","Application mobile, SMS/USSD, WhatsApp, plateforme web, IoT/capteurs, IA, cartographie, base de données…"],
- ["area","pourquoi","Pourquoi cette solution est-elle adaptée à Keur Maba ?"],
- ["area","alternative","Alternative non technologique ou hybride","Si une partie peut se faire sans technologie, la préciser."]]],
-["D · Impact attendu",[
- ["area","directs","Bénéficiaires directs"],
- ["area","indirects","Bénéficiaires indirects"],
- ["chk+","impact","Impact attendu","","Social|Économique|Sanitaire|Éducatif|Environnemental|Administratif"],
- ["area","resultats","Résultats mesurables attendus","Temps économisé, coûts réduits, nombre de bénéficiaires, revenus générés…"],
- ["area","indicateurs","Indicateurs de réussite possibles"]]],
-["E · Faisabilité et contraintes",[
- ["area","ressources","Ressources nécessaires","Humaines, financières, techniques, infrastructure, données, partenaires…"],
- ["area","contraintes","Contraintes identifiées","Connexion Internet, équipement, adoption, coût, compétences, réglementation…"],
- ["area","partenaires","Partenaires potentiels","Commune, structures sanitaires, écoles, associations, entreprises, opérateurs, ONG…"],
- ["rad","difficulte","Niveau de difficulté estimé","","Faible|Moyen|Élevé"],
- ["rad","delai","Délai estimé pour un premier prototype","","< 1 mois|1–3 mois|3–6 mois|> 6 mois"]]],
-["F · Priorisation personnelle",[
- ["score","n0","Importance du problème"],["score","n1","Nombre de personnes potentiellement touchées"],
- ["score","n2","Impact potentiel de la solution"],["score","n3","Faisabilité"],["score","n4","Urgence"],
- ["total"],
- ["area","top3","Pourquoi ce problème devrait-il faire partie du Top 3 ?"]]]
+
 ];
 
-function champ([ty,n,l,a,o,r]){
+function champ([ty,n,l,a,o]){const r=1;
   if(ty==="total")return `<div class="tot"><span>Note globale personnelle</span><b><span id="total">0</span> / 25</b></div>`;
   if(ty==="score")return `<div class="sc"><label for="${n}">${l}</label><select id="${n}" name="${n}" class="note"><option value="0">–</option>${[1,2,3,4,5].map(x=>`<option>${x}</option>`).join("")}</select></div>`;
   const lab=`<label class="t" for="${n}">${l}${r?" <b>*</b>":""}</label>${a?`<span class="aide">${a}</span>`:""}`;
-  if(ty==="area")return `<div class="c">${lab}<textarea id="${n}" name="${n}"></textarea></div>`;
+  if(ty==="area")return `<div class="c">${lab}<textarea id="${n}" name="${n}" ${r?"required":""}></textarea></div>`;
   if(ty==="text"||ty==="date")return `<div class="c">${lab}<input type="${ty}" id="${n}" name="${n}" ${r?"required":""}></div>`;
   const t=ty==="rad"?"radio":"checkbox",au=ty==="chk+";
   const ls=o.split("|").concat(au?["Autre"]:[]).map(x=>`<label><input type="${t}" name="${n}" value="${x}" ${x==="Autre"?'class="ao"':""}> ${x}</label>`).join("");
-  return `<div class="c"><span class="t">${l}</span><div class="opts">${ls}</div>${au?`<input type="text" class="autre" name="${n}_autre" placeholder="Précisez…">`:""}</div>`;
+  return `<div class="c"><span class="t">${l} <b>*</b></span><div class="opts">${ls}</div><p class="ge" hidden>Choisissez au moins une option.</p>${au?`<input type="text" class="autre" name="${n}_autre" placeholder="Précisez…">`:""}</div>`;
 }
 $('#steps').innerHTML=S.map(([t,fs])=>`<div class="step" hidden><h2>${t}</h2>${fs.map(champ).join("")}</div>`).join("");
 $('#date').valueAsDate=new Date();
 const steps=[...document.querySelectorAll('.step')],f=$('#f');let cur=0;
 
 f.addEventListener('change',e=>{
+  const ge=e.target.closest('.c')?.querySelector('.ge');if(ge)ge.hidden=true;
   if(e.target.classList.contains('ao'))e.target.closest('.c').querySelector('.autre').style.display=e.target.checked?'block':'none';
   if(e.target.classList.contains('note')){const t=$('#total');t.textContent=[...document.querySelectorAll('.note')].reduce((a,s)=>a+ +s.value,0);t.classList.remove('bump');void t.offsetWidth;t.classList.add('bump');}
 });
@@ -211,6 +191,7 @@ function show(i,scroll){
 $('#pv').onclick=()=>show(cur-1,1);
 $('#nx').onclick=()=>{
   for(const x of steps[cur].querySelectorAll('[required]'))if(!x.reportValidity())return;
+  for(const g of steps[cur].querySelectorAll('.opts'))if(!g.querySelector('input:checked')){const m=g.closest('.c').querySelector('.ge');m.hidden=false;m.scrollIntoView({behavior:'smooth',block:'center'});return;}
   if(cur<steps.length-1)return show(cur+1,1);
   $('#ap').textContent=texte();envoyer();
   $('#wa').href='https://wa.me/?text='+encodeURIComponent(texte());
@@ -233,7 +214,7 @@ function texte(){
     const v=valeur(n);
     if(v&&v!=="0")t+=`${l} : ${v}${ty==="score"?"/5":""}\n`;
   }));
-  return t+`\nNote globale : ${$('#total').textContent}/25`;
+  return t;
 }
 $('#cp').onclick=async()=>{
   try{await navigator.clipboard.writeText($('#ap').textContent);$('#cp').textContent='Copié ✓';}catch{$('#cp').textContent='Copie impossible';}
@@ -246,7 +227,7 @@ $('#dl').onclick=()=>{
   a.click();
 };
 $('#nw').onclick=()=>{
-  f.reset();$('#total').textContent=0;$('#date').valueAsDate=new Date();
+  f.reset();$('#date').valueAsDate=new Date();
   document.querySelectorAll('.autre').forEach(a=>a.style.display='none');
   $('#res').hidden=true;$('#wiz').hidden=false;show(0,1);
 };
@@ -256,8 +237,7 @@ async function envoyer(){
   const st=$('#st');st.textContent='Enregistrement…';
   const r={};
   S.forEach(([,fs])=>fs.forEach(([ty,n,l])=>{if(ty==='total'||ty==='score')return;const v=valeur(n);if(v)r[l]=v;}));
-  const nn=k=>+$('#n'+k).value;
-  const body={nom:valeur('nom'),localite:valeur('localite'),date_contribution:valeur('date')||null,secteur:valeur('secteur'),titre:valeur('titre'),frequence:valeur('frequence'),difficulte:valeur('difficulte'),delai:valeur('delai'),n0:nn(0),n1:nn(1),n2:nn(2),n3:nn(3),n4:nn(4),reponses:r};
+  const body={nom:valeur('nom'),localite:valeur('localite'),date_contribution:valeur('date')||null,secteur:valeur('secteur'),titre:valeur('titre'),frequence:valeur('frequence'),reponses:r};
   try{
     const res=await fetch(CFG.URL+'/rest/v1/fiches',{method:'POST',headers:{apikey:CFG.KEY,Authorization:'Bearer '+CFG.KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(body)});
     if(!res.ok)throw 0;
