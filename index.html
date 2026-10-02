@@ -163,7 +163,7 @@ function champ([ty,n,l,a,o,r=0]){
   if(ty==="text"||ty==="date")return `<div class="c">${lab}<input type="${ty}" id="${n}" name="${n}" ${r?"required":""}></div>`;
   const t=ty==="rad"?"radio":"checkbox",au=ty==="chk+";
   const ls=o.split("|").concat(au?["Autre"]:[]).map(x=>`<label><input type="${t}" name="${n}" value="${x}" ${x==="Autre"?'class="ao"':""}> ${x}</label>`).join("");
-  return `<div class="c"><span class="t">${l}${r?" <b>*</b>":""}</span><div class="opts">${ls}</div><p class="ge" hidden>Choisissez au moins une option.</p>${au?`<input type="text" class="autre" name="${n}_autre" placeholder="Précisez…">`:""}</div>`;
+  return `<div class="c">${lab}<div class="opts">${ls}</div><p class="ge" hidden>Choisissez au moins une option.</p>${au?`<input type="text" class="autre" name="${n}_autre" placeholder="Précisez…">`:""}</div>`;
 }
 $('#steps').innerHTML=S.map(([t,fs])=>`<div class="step" hidden><h2>${t}</h2>${fs.map(([ty,n,l,a,o,req=0])=> champ(ty,n,l,a,o,req)).join("")}</div>`).join("");
 $('#date').valueAsDate=new Date();
