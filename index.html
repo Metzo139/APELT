@@ -155,7 +155,7 @@ const S=[
  ["area","concernes","Qui est concerné ?","Population, jeunes, femmes, commerçants, élèves, agriculteurs, personnes âgées, agents publics…","",0]]],
 ];
 
-function champ([ty,n,l,a,o,r=0]){
+function champ(ty,n,l,a,o,r=0){
   if(ty==="total")return `<div class="tot"><span>Note globale personnelle</span><b><span id="total">0</span> / 25</b></div>`;
   if(ty==="score")return `<div class="sc"><label for="${n}">${l}</label><select id="${n}" name="${n}" class="note"><option value="0">–</option>${[1,2,3,4,5].map(x=>`<option>${x}</option>`).join("")}</select></div>`;
   const lab=`<label class="t" for="${n}">${l}${r?" <b>*</b>":""}</label>${a?`<span class="aide">${a}</span>`:""}`;
