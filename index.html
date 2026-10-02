@@ -152,12 +152,7 @@ const S=[
 ["B · Identification du problème",[
  ["text","titre","Titre court du problème","",0,1],
  ["area","description","Description du problème","Ce qui se passe, dans quel contexte et pourquoi c'est un problème.",0,1],
- ["area","concernes","Qui est concerné ?","Population, jeunes, femmes, commerçants, élèves, agriculteurs, personnes âgées, agents publics…"],
- ["text","lieu","Où le problème se manifeste-t-il ?"],
- ["rad","frequence","À quelle fréquence ?","","Quotidien|Hebdomadaire|Mensuel|Saisonnière|Occasionnelle"],
- ["area","causes","Causes principales identifiées"],
- ["area","consequences","Conséquences actuelles"],
- ["area","preuves","Exemples / preuves / observations de terrain"]]],
+ ["area","concernes","Qui est concerné ?","Population, jeunes, femmes, commerçants, élèves, agriculteurs, personnes âgées, agents publics…"]]],
 
 ];
 
@@ -237,7 +232,7 @@ async function envoyer(){
   const st=$('#st');st.textContent='Enregistrement…';
   const r={};
   S.forEach(([,fs])=>fs.forEach(([ty,n,l])=>{if(ty==='total'||ty==='score')return;const v=valeur(n);if(v)r[l]=v;}));
-  const body={nom:valeur('nom'),localite:valeur('localite'),date_contribution:valeur('date')||null,secteur:valeur('secteur'),titre:valeur('titre'),frequence:valeur('frequence'),reponses:r};
+  const body={nom:valeur('nom'),localite:valeur('localite'),date_contribution:valeur('date')||null,secteur:valeur('secteur'),titre:valeur('titre'),reponses:r};
   try{
     const res=await fetch(CFG.URL+'/rest/v1/fiches',{method:'POST',headers:{apikey:CFG.KEY,Authorization:'Bearer '+CFG.KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(body)});
     if(!res.ok)throw 0;

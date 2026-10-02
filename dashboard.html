@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -120,7 +121,7 @@
         }
 
         function renderStats() {
-            const moy = DATA.length ? (DATA.reduce((a, d) => a + d.score_total, 0) / DATA.length).toFixed(1) : 0;
+            const moy = DATA.length ? (DATA.reduce((a, d) => a + (d.score_total || 0), 0) / DATA.length).toFixed(1) : 0;
             $('#stats').textContent = `${DATA.length} fiche(s) · score moyen ${moy}/25 · ${new Set(DATA.map(d => d.localite)).size} localité(s)`;
         }
 
@@ -157,7 +158,7 @@
                         <td class="w">${escapeHtml(d.titre)}</td>
                         <td>${escapeHtml(d.localite)}</td>
                         <td>${escapeHtml(d.secteur)}</td>
-                        <td class="sc">${d.score_total}</td>
+                        <td class="sc">${d.score_total || 0}</td>
                         <td>${escapeHtml(d.nom)}</td>
                         <td>${(d.created_at || '').slice(0, 10)}</td>
                     </tr>
@@ -181,8 +182,8 @@
 
             $('#detail').innerHTML = `
                 <h3>${escapeHtml(d.titre)}</h3>
-                <p class="muted">${escapeHtml(d.nom)} · ${escapeHtml(d.localite)} · score ${d.score_total}/25
-                    (importance ${d.n0}, touchés ${d.n1}, impact ${d.n2}, faisabilité ${d.n3}, urgence ${d.n4})</p>
+                <p class="muted">${escapeHtml(d.nom)} · ${escapeHtml(d.localite)} · score ${d.score_total || 0}/25
+                    (importance ${d.n0 || 0}, touchés ${d.n1 || 0}, impact ${d.n2 || 0}, faisabilité ${d.n3 || 0}, urgence ${d.n4 || 0})</p>
                 <dl>${responsesHtml}</dl>
             `;
             $('#detail').scrollIntoView({ behavior: 'smooth' });
@@ -194,12 +195,12 @@
                 ['date', 'score_total', 'n0', 'n1', 'n2', 'n3', 'n4', ...keys],
                 ...DATA.map(d => [
                     (d.created_at || '').slice(0, 10),
-                    d.score_total,
-                    d.n0,
-                    d.n1,
-                    d.n2,
-                    d.n3,
-                    d.n4,
+                    d.score_total || 0,
+                    d.n0 || 0,
+                    d.n1 || 0,
+                    d.n2 || 0,
+                    d.n3 || 0,
+                    d.n4 || 0,
                     ...keys.map(k => (d.reponses || {})[k] || '')
                 ])
             ];
