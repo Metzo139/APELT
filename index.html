@@ -96,15 +96,15 @@ body[data-page=fiche] main,body[data-page=accueil] .hero,#res:not([hidden]){anim
 <video id="bg" autoplay muted loop playsinline></video><div class="veil"></div><div class="aur"><i></i><i></i><i></i></div>
 
 <nav class="nav glass rise">
-  <b class="lg"><img class="logo" alt="APELTECH Keur Maba Diakhou"></b>
+  <b class="lg"><img class="logo" alt="APELTECH Keur Maba Anonyma"></b>
   <span><a href="#" data-go="accueil">Accueil</a><a href="#" data-go="fiche" class="btn g" style="padding:8px 22px;margin-left:24px;color:#fff">Ma fiche</a></span>
 </nav>
 
 <section class="hero" id="top">
-  <img class="logo hlogo rise" alt="APELTECH Keur Maba Diakhou">
+  <img class="logo hlogo rise" alt="APELTECH Keur Maba Anonyma">
   <p class="tag rise" style="--d:.1s">Communauté ApelTech · Commune de Keur Maba</p>
-  <h1 class="rise" style="--d:.25s">Ce que vous voyez chaque jour peut changer <em>Keur Maba</em>.</h1>
-  <p class="sub rise" style="--d:.45s">Décrivez un problème de votre quartier en 3 minutes. Les 3 plus urgents deviendront des solutions concrètes.</p>
+  <h1 class="rise" style="--d:.25s">Les défis de la commune de Keur Maba. Les solutions de demain.</h1>
+  <p class="sub rise" style="--d:.45s">Décrivez un problème de votre village en 3 minutes. Les 3 plus urgents deviendront des solutions concrètes.</p>
   <div class="chips rise" style="--d:.6s"><span class="glass">2 étapes, 3 minutes</span><span class="glass">Votre terrain, votre voix</span><span class="glass">3 projets seront construits</span></div>
   <p class="rule rise" style="--d:.7s">Problème local → besoin réel → solution adaptée → impact mesurable</p>
   <a href="#" data-go="fiche" class="btn rise" style="--d:.8s">Raconter un problème</a>
@@ -193,6 +193,7 @@ $('#nx').onclick=()=>{
 };
 
 function valeur(n){
+  if(n==="nom")return"Anonyma";
   const els=f.querySelectorAll(`[name="${n}"]`);
   if(!els.length)return"";
   if(els[0].type==="checkbox"||els[0].type==="radio"){
